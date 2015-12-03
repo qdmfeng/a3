@@ -1,0 +1,5 @@
+2. Ray-sphere intersection
+The sphere intersection was implemented by solving the quadratic formula to find the intersection points.  The ray may intersects the sphere at zero, one or two points.  If there are two intersection points, the closer intersection point is picked.  The color of the ray is updated according to the color of the sphere, otherwise it is black.
+
+3. Ray-square intersection
+The square intersection was implemented by projecting the position of the light source onto the plane and checking if the interscetion point falls within the square.  The color of the ray is updated according to the color of the sphere, otherwise it is black.
