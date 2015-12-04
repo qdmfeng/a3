@@ -53,3 +53,10 @@ void PointLight::shade( Ray3D& ray ) {
 
 }
 
+void PointLight::shadeShadow( Ray3D& ray ) {
+	Colour ambientIntensity = _col_ambient * ray.intersection.mat->ambient;
+	ray.col = ambientIntensity;
+	ray.col.clamp();
+
+}
+
