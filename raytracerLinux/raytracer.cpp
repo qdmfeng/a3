@@ -253,6 +253,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 	_scrWidth = width;
 	_scrHeight = height;
 	double factor = (double(height)/2)/tan(fov*M_PI/360.0);
+	bool antiAlias = true;
 
 	initPixelBuffer();
 	viewToWorld = initInvViewMatrix(eye, view, up);
@@ -264,28 +265,49 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 			// image plane is at z = -1.
 			Point3D origin(0, 0, 0);
 			Point3D imagePlane;
-			imagePlane[0] = (-double(width)/2 + 0.5 + j)/factor;
-			imagePlane[1] = (-double(height)/2 + 0.5 + i)/factor;
-			imagePlane[2] = -1;
+			
+			//perform anti-Alias
+			if (antiAlias){
+				for (float frag1 = i;frag1 < i + 1.0f; frag1 += 0.5f){
+					for (float frag2= j;frag2 < j + 1.0f; frag2 += 0.5f){
+						imagePlane[0] = (-double(width)/2 + 0.5 + frag2)/factor;
+                        imagePlane[1] = (-double(height)/2 + 0.5 + frag1)/factor;
+                        imagePlane[2] = -1;
+                        
+                        Point3D rayOriginWorld = viewToWorld * imagePlane;
+                        Vector3D rayDirWorld = rayOriginWorld - eye;
+                        rayDirWorld.normalize();
+                        
+                        Ray3D ray(rayOriginWorld, rayDirWorld);
+                        Colour col = shadeRay(ray);
+                        _rbuffer[i*width+j] += int(col[0]*255*0.25f);
+                        _gbuffer[i*width+j] += int(col[1]*255*0.25f);
+                        _bbuffer[i*width+j] += int(col[2]*255*0.25f);
+                    }
+                }
+            }else{			
+				imagePlane[0] = (-double(width)/2 + 0.5 + j)/factor;
+				imagePlane[1] = (-double(height)/2 + 0.5 + i)/factor;
+				imagePlane[2] = -1;
 
-			// TODO: Convert ray to world space and call 
-			// shadeRay(ray) to generate pixel colour. 				
+				// TODO: Convert ray to world space and call 
+				// shadeRay(ray) to generate pixel colour. 				
 
-			Point3D worldOrigin = viewToWorld * origin;
-			Point3D worldImagePlane = viewToWorld * imagePlane;
+				Point3D worldOrigin = viewToWorld * origin;
+				Point3D worldImagePlane = viewToWorld * imagePlane;
 
-			Vector3D direction(worldImagePlane[0] - worldOrigin[0], worldImagePlane[1] - worldOrigin[1], worldImagePlane[2] - worldOrigin[2]);
+				Vector3D direction(worldImagePlane[0] - worldOrigin[0], worldImagePlane[1] - worldOrigin[1], worldImagePlane[2] - worldOrigin[2]);
 
-			Ray3D ray(worldImagePlane, direction);
+				Ray3D ray(worldImagePlane, direction);
 
-			Colour col = shadeRay(ray); 
+				Colour col = shadeRay(ray); 
 
-			_rbuffer[i*width+j] = int(col[0]*255);
-			_gbuffer[i*width+j] = int(col[1]*255);
-			_bbuffer[i*width+j] = int(col[2]*255);
+				_rbuffer[i*width+j] = int(col[0]*255);
+				_gbuffer[i*width+j] = int(col[1]*255);
+				_bbuffer[i*width+j] = int(col[2]*255);
+			}
 		}
 	}
-
 	flushPixelBuffer(fileName);
 }
 

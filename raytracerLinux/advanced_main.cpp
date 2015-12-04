@@ -25,8 +25,8 @@ int main(int argc, char* argv[])
 	// change this if you're just implementing part one of the 
 	// assignment.  
 	Raytracer raytracer;
-	int width = 160; 
-	int height = 120; 
+	int width = 640; 
+	int height = 480; 
 
 	if (argc == 3) {
 		width = atoi(argv[1]);
@@ -55,12 +55,11 @@ int main(int argc, char* argv[])
 	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &gold );
 	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &jade );
 	SceneDagNode* cylinder1 = raytracer.addObject(new UnitCylinder(), &gold);
-	SceneDagNode* cylinder2 = raytracer.addObject(new UnitCylinder(), &gold);
 
 	// Apply some transformations to the unit square.
 	double factor1[3] = { 1.0, 1.0, 1.0 };
 	double factor2[3] = { 6.0, 6.0, 6.0 };
-	double factor3[3] = { 0.2, 0.2, 0.2 };
+	double factor3[3] = { 0.5, 0.5, 2 };
 
 	raytracer.translate(sphere, Vector3D(0, 0, -5));	
 	raytracer.rotate(sphere, 'x', -45); 
@@ -73,9 +72,6 @@ int main(int argc, char* argv[])
 
     raytracer.translate(cylinder1, Vector3D(1.5, 1.5, -5));
     raytracer.scale(cylinder1, Point3D(0, 0, 0), factor3);
-
-    raytracer.translate(cylinder2, Vector3D(-1.5, -1.5, -5));
-    raytracer.scale(cylinder2, Point3D(0, 0, 0), factor3);
 
 	// Render the scene, feel free to make the image smaller for
 	// testing purposes.	
