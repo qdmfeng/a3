@@ -232,17 +232,17 @@ Colour Raytracer::shadeRay( Ray3D& ray ) {
 	// anything.
 	if (!ray.intersection.none) {
 		computeShading(ray);
-		col = ray.col; 
+		//col = ray.col; 
  
 		// You'll want to call shadeRay recursively (with a different ray, 
 		// of course) here to implement reflection/refraction effects.
-		//ray.dir.normalize();
-		//Vector3D mirrorDir = ((2 * (ray.intersection.normal.dot(-ray.dir))) * ray.intersection.normal) - (-ray.dir);
-		//Ray3D reflectRay(ray.intersection.point + 0.01 * mirrorDir, mirrorDir);
-		//shadeRay(reflectRay);
-		//col = ray.col + reflectRay.col;
+		ray.dir.normalize();
+		Vector3D mirrorDir = ((2 * (ray.intersection.normal.dot(-ray.dir))) * ray.intersection.normal) - (-ray.dir);
+		Ray3D reflectRay(ray.intersection.point + 0.01 * mirrorDir, mirrorDir);
+		shadeRay(reflectRay);
+		col = ray.col + 0.5 * reflectRay.col;
 	}
-	//col.clamp();
+	col.clamp();
 
 	return col; 
 }	
@@ -297,8 +297,8 @@ int main(int argc, char* argv[])
 	// change this if you're just implementing part one of the 
 	// assignment.  
 	Raytracer raytracer;
-	int width = 160; 
-	int height = 120; 
+	int width = 320; 
+	int height = 240; 
 
 	if (argc == 3) {
 		width = atoi(argv[1]);
@@ -326,12 +326,12 @@ int main(int argc, char* argv[])
 	// Add a unit square into the scene with material mat.
 	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &gold );
 	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &jade );
-	//SceneDagNode* cylinder = raytracer.addObject(new UnitCylinder(), &gold);
+	SceneDagNode* cylinder = raytracer.addObject(new UnitCylinder(), &gold);
 
 	// Apply some transformations to the unit square.
 	double factor1[3] = { 1.0, 2.0, 1.0 };
 	double factor2[3] = { 6.0, 6.0, 6.0 };
-	//double factor3[3] = { 1.0, 1.0, 1.0 };
+	double factor3[3] = { 1.0, 1.0, 1.0 };
 	raytracer.translate(sphere, Vector3D(0, 0, -5));	
 	raytracer.rotate(sphere, 'x', -45); 
 	raytracer.rotate(sphere, 'z', 45); 
@@ -342,8 +342,8 @@ int main(int argc, char* argv[])
 	raytracer.scale(plane, Point3D(0, 0, 0), factor2);
 
 
-    //raytracer.translate(cylinder, Vector3D(2,1,-3));
-    //raytracer.scale(cylinder, Point3D(0,0,0), factor3);
+    raytracer.translate(cylinder, Vector3D(2,1,-3));
+    raytracer.scale(cylinder, Point3D(0,0,0), factor3);
 
 	// Render the scene, feel free to make the image smaller for
 	// testing purposes.	
