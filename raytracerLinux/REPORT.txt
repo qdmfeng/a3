@@ -3,3 +3,9 @@ The sphere intersection was implemented by solving the quadratic formula to find
 
 3. Ray-square intersection
 The square intersection was implemented by projecting the position of the light source onto the plane and checking if the interscetion point falls within the square.  The color of the ray is updated according to the color of the sphere, otherwise it is black.
+
+Anti-Aliasing
+The Anti-Aliasing was implemented by apply more rays on a single pixel. In the function render, we compute 4 times more rays for each pixel by setting the increment from 1 to 0.5, thus for each ray, it only contributes 1/4 of a full pixel contributes. So that the image gets clear.
+
+Soft Shadow
+The Soft Shadow was implemented by calculating multiple point light source nearby the original point light source. So that it can be considered as an area light source.
