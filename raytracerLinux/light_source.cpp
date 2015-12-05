@@ -40,10 +40,10 @@ void PointLight::shade( Ray3D& ray ) {
 
 
 	// uncomment below line to show scene signature without using Phong model
-	//ray.col = ray.intersection.mat->ambient + ray.intersection.mat->diffuse;
+	ray.col = ray.intersection.mat->ambient + ray.intersection.mat->diffuse;
 
 	// uncomment below line to shade the scene using Phong model without specular
-	//ray.col = ambientIntensity + diffuseIntensity;
+	ray.col = ambientIntensity + diffuseIntensity;
 
 	// shade the scene using Phong model
 	ray.col = ambientIntensity + diffuseIntensity + specularIntensity;

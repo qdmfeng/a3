@@ -110,7 +110,7 @@ private:
 
 	// Return the colour of the ray after intersection and shading, call 
 	// this function recursively for reflection and refraction.  
-	Colour shadeRay( Ray3D& ray ); 
+	Colour shadeRay( Ray3D& ray); 
 
 	// Constructs a view to world transformation matrix based on the
 	// camera parameters.
@@ -120,7 +120,7 @@ private:
 	// the object space of each node where intersection is performed.
 	void traverseScene( SceneDagNode* node, Ray3D& ray );
 
-	// After intersection, calculate the colour of the ray by shading it
+        // After intersection, calculate the colour of the ray by shading it
 	// with all light sources in the scene.
 	void computeShading( Ray3D& ray );
 	

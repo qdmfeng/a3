@@ -182,25 +182,52 @@ void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {
 
 void Raytracer::computeShading( Ray3D& ray ) {
 	LightListNode* curLight = _lightSource;
+
+	Colour sum_shade(0.0, 0.0, 0.0);
 	for (;;) {
 		if (curLight == NULL) break;
 		// Each lightSource provides its own shading function.
+		
+	   // Implement shadows here if needed.
 
-		// Implement shadows here if needed.
 		Point3D intersectionPoint = ray.intersection.point;
-		Point3D lightPoint = curLight->light->get_position();
-		Vector3D direction(lightPoint[0] - intersectionPoint[0], lightPoint[1] - intersectionPoint[1], lightPoint[2] - intersectionPoint[2]);
-		Ray3D shadowRay(intersectionPoint + 0.01 * direction, direction);
-		traverseScene(_root, shadowRay);
-
-		if(!shadowRay.intersection.none && shadowRay.intersection.t_value >= 0.0 && shadowRay.intersection.t_value <= 1.0){
-			curLight->light->shadeShadow(ray);
-		}
-		else{
+		Point3D light_position = curLight->light->get_position();
+		Vector3D dir(light_position[0] - intersectionPoint[0], light_position[1] - intersectionPoint[1], light_position[2] - intersectionPoint[2]);
+		dir.normalize();
+		Point3D origin = ray.intersection.point;
+		Ray3D shadowRay = Ray3D(intersectionPoint + 0.01 * dir, dir); 
+		traverseScene(_root, shadowRay); 
+		if (shadowRay.intersection.none) {
 			curLight->light->shade(ray);
 		}
+		
+		//Soft shadows
+		sum_shade = sum_shade + 0.5*ray.col;
+		for (int k=0; k < 15; k++) {
+			double varx = ((((double)rand() / (double)RAND_MAX)*2) - 1) * 0.2;
+			double vary = ((((double)rand() / (double)RAND_MAX)*2) - 1) * 0.2;
+			double varz = ((((double)rand() / (double)RAND_MAX)*2) - 1) * 0.2;
+			Point3D tempShadowOrigin = origin;
+			tempShadowOrigin[0] = tempShadowOrigin[0] + varx;
+			tempShadowOrigin[1] = tempShadowOrigin[1] + vary;
+			tempShadowOrigin[2] = tempShadowOrigin[2] + varz;			
+			tempShadowOrigin = tempShadowOrigin + 0.2*dir; 	
+			shadowRay = Ray3D(tempShadowOrigin, dir);
+			traverseScene(_root, shadowRay);
+			if (shadowRay.intersection.none) {
+				curLight->light->shade(ray);				
+				sum_shade = sum_shade + 0.1*ray.col;
+			}
+			
+		}
+		
+		curLight->light->shade(ray);
 		curLight = curLight->next;
+		
 	}
+	sum_shade = (1.0/( (0.5) + (0.1)*(15-1)))*sum_shade;
+	sum_shade.clamp();
+	ray.col = sum_shade;	
 }
 
 void Raytracer::initPixelBuffer() {
@@ -232,7 +259,7 @@ Colour Raytracer::shadeRay( Ray3D& ray ) {
 	// anything.
 	if (!ray.intersection.none) {
 		computeShading(ray);
-		//col = ray.col; 
+		col = ray.col; 
  
 		// You'll want to call shadeRay recursively (with a different ray, 
 		// of course) here to implement reflection/refraction effects.
@@ -284,8 +311,8 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
                         _gbuffer[i*width+j] += int(col[1]*255*0.25f);
                         _bbuffer[i*width+j] += int(col[2]*255*0.25f);
                     }
-                }
-            }else{			
+				}			
+			}else{			
 				imagePlane[0] = (-double(width)/2 + 0.5 + j)/factor;
 				imagePlane[1] = (-double(height)/2 + 0.5 + i)/factor;
 				imagePlane[2] = -1;
