@@ -3,9 +3,7 @@ Assignment 3 Project
 Shihao Miao
 Ziyi Mu
 
-In this assignment, we finished the functions in ray tracer and generated 6 images for part 1, and then we extended the retracer to generate images of a chamber with several advanced ray tracing features for part 2.
-
-
+In this assignment, we finished the functions in ray tracer and generated 6 images for part 1, and then we extended the ray tracer to generate images of a chamber with several advanced ray tracing features for part 2.
 
 Part 1
 In part 1 we finished the function in ray tracer and generated 6 images: sig1, sig2, diffuse1, diffuse2, phong1, phong2. The scene is constructed by main.cpp function.
@@ -20,18 +18,16 @@ The sphere intersection was implemented by solving the quadratic formula to find
 The square intersection was implemented by projecting the position of the light source onto the plane and checking if the interscetion point falls within the square.  The color of the ray is updated according to the color of the sphere, otherwise it is black. That is implemented by Shihao Miao.
 
 4. Phong shading
-The Phong shading should be the sum of ambient, diffuse and specular component of the intersection material. That is implemented by Ziyi Mu.
-
-
+The Phong shading should be the sum of ambient, diffuse and specular component of the intersection material. We summed up all those components scaled by the coefficient of the light source. That is implemented by Ziyi Mu.
 
 Part 2
-In part 2 we generated a chamber room called "lighting chamber" with a several objects in it. The wall is decoreated by lightning texture, and there is a "magic" sphere in the center which could handle refraction. The scene is constructed by advanced_main.cpp function. When it compiles it produces a "chamber" executable file which will generate 3 images of the chamber when running. Here we implemented 5 features in addtion to the mandatory Secondary reflection and Shadow.
+In part 2 we extened the ray tracer to generate a chamber room called "lighting chamber" with a several objects in it. The wall is decoreated by lightning texture, and there is a "magic" sphere in the center which could refract the scene as well as two cylinder seats along with it. The scene is constructed by advanced_main.cpp function. When it compiles it produces a "chamber" executable file which will generate 3 images of the chamber when running. Here we implemented 5 features in addtion to the mandatory Secondary reflection and Shadow in order to produce such a scene.
 
 Secondary reflection and Shadow
-Those features are implemented by firing a ray from the intersection point with a direction of specular. That is implemented by Ziyi Mu.
+Secondary reflection is implemented by firing a ray from the intersection point with specular direction of specular; shadow is implemented by firing a ray towards the light source. That is implemented by Ziyi Mu.
 
 Compound object (cylinder)
-The cylinder intersection was implemented by projecting the position of the light source onto the object. That is implemented by Shihao Miao.
+The cylinder intersection was implemented by solving the quadratic formula to find the intersection points. The ray may intersect with the cylinder side or base, so we checked those cases respectively. That is implemented by Shihao Miao.
 
 Anti-Aliasing
 The Anti-Aliasing was implemented by apply more rays on a single pixel. In the function render, we compute 4 times more rays for each pixel by setting the increment from 1 to 0.5, thus for each ray, it only contributes 1/4 of a full pixel contributes. So that the image gets clear. That is implemented by Shihao Miao.
@@ -40,11 +36,9 @@ Soft Shadow
 The Soft Shadow was implemented by calculating multiple point light source nearby the original point light source. So that it can be considered as an area light source. That is implemented by Shihao Miao.
 
 Text Mapping
-The text mapping requires reading from the image, then mapping each model coordinate to the texture image coordinate. That is implemented by Ziyi Mu.
+The text mapping requires bmp read from the texture image, then mapping each model coordinate to the texture image coordinate. Here we passed the material texture info when calculating the intersection so texture info could be applied to the intersection point. That is implemented by Ziyi Mu.
 
 Refraction
-We added refraction index for material which is transmissive, then used the value to calculate the refraction ray. That is implemented by Ziyi Mu.
-
+We added refraction index for material which is transmissive, then used the value to calculate direction of the refraction ray. Then it is checked when doing the recursive ray shading. That is implemented by Ziyi Mu.
 
 The aid comes from the textbook and the online notes, and the lighting texture picture comes from the online source (UCSD computer graphics course supporting material). 
-
