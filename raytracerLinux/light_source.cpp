@@ -20,6 +20,20 @@ void PointLight::shade( Ray3D& ray ) {
 	// is available.  So be sure that traverseScene() is called on the ray 
 	// before this function.  
 
+	if (ray.intersection.mat->texture != NULL) {
+		int width = floor((ray.intersection.point[0] + 0.5) * ray.intersection.mat->texture->width);
+        int height = floor((ray.intersection.point[1] + 0.5) * ray.intersection.mat->texture->height);
+        int index = height * ray.intersection.mat->texture->width + width;
+        double R = (double) *(ray.intersection.mat->texture->rarray + index) / 255;
+        double G = (double) *(ray.intersection.mat->texture->rarray + index) / 255;
+        double B = (double) *(ray.intersection.mat->texture->rarray + index) / 255;
+		Colour textureCol = Colour(R, G, B);
+        ray.intersection.mat->ambient = textureCol;
+        ray.intersection.mat->diffuse = textureCol;
+    }
+
+
+    // get light direction
 	Vector3D lightDirection(_pos[0] - ray.intersection.point[0], _pos[1] - ray.intersection.point[1], _pos[2] - ray.intersection.point[2]);
 	lightDirection.normalize();
 
@@ -38,12 +52,11 @@ void PointLight::shade( Ray3D& ray ) {
 	Colour specularIntensity = specularPara * _col_specular * ray.intersection.mat->specular;
 
 
-
 	// uncomment below line to show scene signature without using Phong model
-	ray.col = ray.intersection.mat->ambient + ray.intersection.mat->diffuse;
+	//ray.col = ray.intersection.mat->ambient + ray.intersection.mat->diffuse;
 
 	// uncomment below line to shade the scene using Phong model without specular
-	ray.col = ambientIntensity + diffuseIntensity;
+	//ray.col = ambientIntensity + diffuseIntensity;
 
 	// shade the scene using Phong model
 	ray.col = ambientIntensity + diffuseIntensity + specularIntensity;

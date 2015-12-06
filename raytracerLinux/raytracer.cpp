@@ -182,28 +182,27 @@ void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {
 
 void Raytracer::computeShading( Ray3D& ray ) {
 	LightListNode* curLight = _lightSource;
-
 	Colour sum_shade(0.0, 0.0, 0.0);
+	int light_num = 1;
 	for (;;) {
 		if (curLight == NULL) break;
 		// Each lightSource provides its own shading function.
 		
 	   // Implement shadows here if needed.
 
-		Point3D intersectionPoint = ray.intersection.point;
-		Point3D light_position = curLight->light->get_position();
-		Vector3D dir(light_position[0] - intersectionPoint[0], light_position[1] - intersectionPoint[1], light_position[2] - intersectionPoint[2]);
-		dir.normalize();
 		Point3D origin = ray.intersection.point;
-		Ray3D shadowRay = Ray3D(intersectionPoint + 0.01 * dir, dir); 
+		Point3D light_position = curLight->light->get_position();
+		Vector3D dir(light_position[0] - origin[0], light_position[1] - origin[1], light_position[2] - origin[2]);
+		dir.normalize();
+		Ray3D shadowRay = Ray3D(origin + 0.01 * dir, dir); 
 		traverseScene(_root, shadowRay); 
 		if (shadowRay.intersection.none) {
 			curLight->light->shade(ray);
 		}
 		
-		//Soft shadows
+		// Entended light on each light source to generate soft shadows
 		sum_shade = sum_shade + 0.5*ray.col;
-		for (int k=0; k < 15; k++) {
+		for (int k=0; k < light_num; k++) {
 			double varx = ((((double)rand() / (double)RAND_MAX)*2) - 1) * 0.2;
 			double vary = ((((double)rand() / (double)RAND_MAX)*2) - 1) * 0.2;
 			double varz = ((((double)rand() / (double)RAND_MAX)*2) - 1) * 0.2;
@@ -225,7 +224,7 @@ void Raytracer::computeShading( Ray3D& ray ) {
 		curLight = curLight->next;
 		
 	}
-	sum_shade = (1.0/( (0.5) + (0.1)*(15-1)))*sum_shade;
+	sum_shade = (1.0/( (0.5) + (0.1)*(light_num-1)))*sum_shade;
 	sum_shade.clamp();
 	ray.col = sum_shade;	
 }
@@ -251,7 +250,7 @@ void Raytracer::flushPixelBuffer( char *file_name ) {
 	delete _bbuffer;
 }
 
-Colour Raytracer::shadeRay( Ray3D& ray ) {
+Colour Raytracer::shadeRay( Ray3D& ray, int recursiveDepth ) {
 	Colour col(0.0, 0.0, 0.0); 
 	traverseScene(_root, ray); 
 	
@@ -263,11 +262,43 @@ Colour Raytracer::shadeRay( Ray3D& ray ) {
  
 		// You'll want to call shadeRay recursively (with a different ray, 
 		// of course) here to implement reflection/refraction effects.
-		ray.dir.normalize();
-		Vector3D mirrorDir = ((2 * (ray.intersection.normal.dot(-ray.dir))) * ray.intersection.normal) - (-ray.dir);
-		Ray3D reflectRay(ray.intersection.point + 0.01 * mirrorDir, mirrorDir);
-		shadeRay(reflectRay);
-		col = ray.col + 0.3 * reflectRay.col;
+		if (recursiveDepth > 0){
+			// implement reflection
+			if (ray.intersection.mat->refraction == 0){
+				ray.dir.normalize();
+				Vector3D mirrorDir = ((2 * (ray.intersection.normal.dot(-ray.dir))) * ray.intersection.normal) - (-ray.dir);
+				Ray3D reflectRay(ray.intersection.point + 0.01 * mirrorDir, mirrorDir);
+				shadeRay(reflectRay, recursiveDepth - 1);
+				if (!reflectRay.intersection.none)
+					col = col + ray.intersection.mat->specular * reflectRay.col;
+			}
+			
+			// implement refraction - transparent object has refraction > 0
+			if (ray.intersection.mat->refraction > 0) {
+				Vector3D surfaceNormal = ray.intersection.normal;
+				double cosAngle = surfaceNormal.dot(-ray.dir);
+				double index = 1.0;
+				// ray into material
+				if (cosAngle > 0){
+					index = 1.0 / ray.intersection.mat->refraction;
+					// need to change surface normal
+					surfaceNormal = -surfaceNormal;
+				}				
+				else{
+					index = ray.intersection.mat->refraction;
+				}
+				double sinTheta = index * index * (1.0 - cosAngle * cosAngle);
+				// not total internal refraction
+				if (sinTheta <= 1.0){
+					Vector3D refractionDir = index * -ray.dir - (index * cosAngle + sqrt(1.0 - sinTheta)) * surfaceNormal;
+					refractionDir.normalize();
+					Ray3D refractionRay(ray.intersection.point + 0.01 * refractionDir, refractionDir);			
+					shadeRay(refractionRay, recursiveDepth - 1);
+					if (!refractionRay.intersection.none)
+						col = refractionRay.col;
+				}			
+			}
+		}
 	}
 	col.clamp();
 
@@ -280,7 +311,8 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 	_scrWidth = width;
 	_scrHeight = height;
 	double factor = (double(height)/2)/tan(fov*M_PI/360.0);
-	bool antiAlias = true;
+	bool antiAlias = false;
+	int recursiveDepth = 5;
 
 	initPixelBuffer();
 	viewToWorld = initInvViewMatrix(eye, view, up);
@@ -306,7 +338,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
                         rayDirWorld.normalize();
                         
                         Ray3D ray(rayOriginWorld, rayDirWorld);
-                        Colour col = shadeRay(ray);
+                        Colour col = shadeRay(ray, recursiveDepth);
                         _rbuffer[i*width+j] += int(col[0]*255*0.25f);
                         _gbuffer[i*width+j] += int(col[1]*255*0.25f);
                         _bbuffer[i*width+j] += int(col[2]*255*0.25f);
@@ -327,7 +359,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 
 				Ray3D ray(worldImagePlane, direction);
 
-				Colour col = shadeRay(ray); 
+				Colour col = shadeRay(ray, recursiveDepth); 
 
 				_rbuffer[i*width+j] = int(col[0]*255);
 				_gbuffer[i*width+j] = int(col[1]*255);

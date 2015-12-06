@@ -128,10 +128,21 @@ Colour operator *(double s, const Colour& c);
 Colour operator +(const Colour& u, const Colour& v); 
 std::ostream& operator <<(std::ostream& o, const Colour& c); 
 
+struct Texture {
+	Texture( unsigned long int width, unsigned long int height, unsigned char * rarray, unsigned char * barray, unsigned char * garray ) :
+		width(width), height(height), rarray(rarray), barray(barray), garray(garray) {}
+
+	unsigned long int width;
+	unsigned long int height;
+	unsigned char * rarray;
+	unsigned char * barray;
+	unsigned char * garray;
+};
+
 struct Material {
-	Material( Colour ambient, Colour diffuse, Colour specular, double exp ) :
+	Material( Colour ambient, Colour diffuse, Colour specular, double exp, double refraction, Texture * texture ) :
 		ambient(ambient), diffuse(diffuse), specular(specular), 
-		specular_exp(exp) {}
+		specular_exp(exp), refraction(refraction), texture(texture) {}
 	
 	// Ambient components for Phong shading.
 	Colour ambient; 
@@ -141,6 +152,10 @@ struct Material {
 	Colour specular;
 	// Specular expoent.
 	double specular_exp;
+	// Refraction index
+	double refraction;
+	// Texture info
+	Texture * texture;
 };
 
 struct Intersection {
@@ -177,6 +192,7 @@ struct Ray3D {
 	// function.
 	Colour col;
 };
+
 #endif
 
 
