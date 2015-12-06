@@ -3,33 +3,48 @@ Assignment 3 Project
 Shihao Miao
 Ziyi Mu
 
-In this assignment, we finished the functions in ray tracer and generated 6 images for part 1, and then we extended the retracer to generate a picture of a chamber with several advanced ray tracing features for part 2.
+In this assignment, we finished the functions in ray tracer and generated 6 images for part 1, and then we extended the retracer to generate images of a chamber with several advanced ray tracing features for part 2.
+
 
 
 Part 1
 In part 1 we finished the function in ray tracer and generated 6 images: sig1, sig2, diffuse1, diffuse2, phong1, phong2. The scene is constructed by main.cpp function.
 
 1. Ray casting
-
+The Ray casting is converting ray to world space and pass the shadeRay function. That is implemented by Ziyi Mu.			
 
 2. Ray-sphere intersection
-The sphere intersection was implemented by solving the quadratic formula to find the intersection points.  The ray may intersects the sphere at zero, one or two points.  If there are two intersection points, the closer intersection point is picked.  The color of the ray is updated according to the color of the sphere, otherwise it is black.
+The sphere intersection was implemented by solving the quadratic formula to find the intersection points.  The ray may intersects the sphere at zero, one or two points.  If there are two intersection points, the closer intersection point is picked.  The color of the ray is updated according to the color of the sphere, otherwise it is black. That is implemented by Shihao Miao.
 
 3. Ray-square intersection
-The square intersection was implemented by projecting the position of the light source onto the plane and checking if the interscetion point falls within the square.  The color of the ray is updated according to the color of the sphere, otherwise it is black.
+The square intersection was implemented by projecting the position of the light source onto the plane and checking if the interscetion point falls within the square.  The color of the ray is updated according to the color of the sphere, otherwise it is black. That is implemented by Shihao Miao.
 
 4. Phong shading
+The Phong shading should be the sum of ambient, diffuse and specular component of the intersection material. That is implemented by Ziyi Mu.
+
 
 
 Part 2
-In part 2 we generated a chamber room with a several object. The scene is constructed by advanced_main.cpp function.
+In part 2 we generated a chamber room called "lighting chamber" with a several objects in it. The wall is decoreated by lightning texture, and there is a "magic" sphere in the center which could handle refraction. The scene is constructed by advanced_main.cpp function. When it compiles it produces a "chamber" executable file which will generate 3 images of the chamber when running. Here we implemented 5 features in addtion to the mandatory Secondary reflection and Shadow.
+
+Secondary reflection and Shadow
+Those features are implemented by firing a ray from the intersection point with a direction of specular. That is implemented by Ziyi Mu.
 
 Compound object (cylinder)
+The cylinder intersection was implemented by projecting the position of the light source onto the object. That is implemented by Shihao Miao.
 
 Anti-Aliasing
-The Anti-Aliasing was implemented by apply more rays on a single pixel. In the function render, we compute 4 times more rays for each pixel by setting the increment from 1 to 0.5, thus for each ray, it only contributes 1/4 of a full pixel contributes. So that the image gets clear.
+The Anti-Aliasing was implemented by apply more rays on a single pixel. In the function render, we compute 4 times more rays for each pixel by setting the increment from 1 to 0.5, thus for each ray, it only contributes 1/4 of a full pixel contributes. So that the image gets clear. That is implemented by Shihao Miao.
 
 Soft Shadow
-The Soft Shadow was implemented by calculating multiple point light source nearby the original point light source. So that it can be considered as an area light source.
+The Soft Shadow was implemented by calculating multiple point light source nearby the original point light source. So that it can be considered as an area light source. That is implemented by Shihao Miao.
 
+Text Mapping
+The text mapping requires reading from the image, then mapping each model coordinate to the texture image coordinate. That is implemented by Ziyi Mu.
+
+Refraction
+We added refraction index for material which is transmissive, then used the value to calculate the refraction ray. That is implemented by Ziyi Mu.
+
+
+The aid comes from the textbook and the online notes, and the lighting texture picture comes from the online source (UCSD computer graphics course supporting material). 
 

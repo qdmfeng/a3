@@ -20,37 +20,19 @@ void PointLight::shade( Ray3D& ray ) {
 	// is available.  So be sure that traverseScene() is called on the ray 
 	// before this function.  
 
-	if (ray.intersection.mat->texture != NULL) {
-		int width = floor((ray.intersection.point[0] + 0.5) * ray.intersection.mat->texture->width);
-        int height = floor((ray.intersection.point[1] + 0.5) * ray.intersection.mat->texture->height);
-        int index = height * ray.intersection.mat->texture->width + width;
-        double R = (double) *(ray.intersection.mat->texture->rarray + index) / 255;
-        double G = (double) *(ray.intersection.mat->texture->rarray + index) / 255;
-        double B = (double) *(ray.intersection.mat->texture->rarray + index) / 255;
-		Colour textureCol = Colour(R, G, B);
-        ray.intersection.mat->ambient = textureCol;
-        ray.intersection.mat->diffuse = textureCol;
-    }
-
-
-    // get light direction
 	Vector3D lightDirection(_pos[0] - ray.intersection.point[0], _pos[1] - ray.intersection.point[1], _pos[2] - ray.intersection.point[2]);
 	lightDirection.normalize();
-
 	// calculate the ambient component
 	Colour ambientIntensity = _col_ambient * ray.intersection.mat->ambient;
-
 	// calculate the diffuse component
 	double diffusePara = fmax(0, ray.intersection.normal.dot(lightDirection));
 	Colour diffuseIntensity = diffusePara * _col_diffuse * ray.intersection.mat->diffuse;
-
 	// calculate the specular component
 	Vector3D mirrorDir = ((2 * (ray.intersection.normal.dot(-lightDirection))) * ray.intersection.normal) - (-lightDirection);
 	mirrorDir.normalize();
 	ray.dir.normalize();
 	double specularPara = pow(fmax(0, mirrorDir.dot(ray.dir)), ray.intersection.mat->specular_exp);
 	Colour specularIntensity = specularPara * _col_specular * ray.intersection.mat->specular;
-
 
 	// uncomment below line to show scene signature without using Phong model
 	//ray.col = ray.intersection.mat->ambient + ray.intersection.mat->diffuse;
@@ -62,13 +44,6 @@ void PointLight::shade( Ray3D& ray ) {
 	ray.col = ambientIntensity + diffuseIntensity + specularIntensity;
 	
 	// clamp color values
-	ray.col.clamp();
-
-}
-
-void PointLight::shadeShadow( Ray3D& ray ) {
-	Colour ambientIntensity = _col_ambient * ray.intersection.mat->ambient;
-	ray.col = ambientIntensity;
 	ray.col.clamp();
 
 }

@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 	}
 
 	// Camera parameters.
-	Point3D eye(0, 0, 5);
+	Point3D eye(0, 0, 10);
 	Vector3D view(0, 0, -1);
 	Vector3D up(0, 1, 0);
 	double fov = 60;
@@ -51,20 +51,20 @@ int main(int argc, char* argv[])
 			5.0, 0, NULL );
 	Material glass( Colour(0.1, 0.1, 0.1), Colour(0.1, 0.1, 0.1), 
 			Colour(0.9, 0.9, 0.9), 
-			100, 1.8, NULL );
+			100, 1.5, NULL );
 
 	// Define texture for shading
-	unsigned char *rarray, *barray, *garray;
+	unsigned char *rarray, *garray, *barray;
 	unsigned long int bmpwidth;
 	long int bmpheight;
-	Texture * lightning = NULL;
-	if (!bmp_read("LightningTexture.bmp", &bmpwidth, &bmpheight, &rarray, &barray, &garray)){
-		Texture temp(bmpwidth, bmpheight, rarray, barray, garray);
-		lightning = &temp;
-	}
+	bool err = bmp_read("LightningTexture.bmp", &bmpwidth, &bmpheight, &rarray, &garray, &barray);
+	if (err) { return -1; }
+
+	Texture lightning(bmpwidth, bmpheight, rarray, garray, barray);
+
 	Material wall( Colour(0.1, 0.1, 0.1), Colour(0.1, 0.1, 0.1), 
-		Colour(0.8, 0.8, 0.8), 
-		100, 1.8, lightning );
+		Colour(0.1, 0.1, 0.1), 
+		5.0, 1.8, &lightning );
 
 
 	// Defines a point light source.
@@ -76,10 +76,10 @@ int main(int argc, char* argv[])
 	SceneDagNode* cylinder2 = raytracer.addObject(new UnitCylinder(), &gold );
 	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &glass );
 	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &blue );
-	SceneDagNode* wall1 = raytracer.addObject( new UnitSquare(), &gold );
-	SceneDagNode* wall2 = raytracer.addObject( new UnitSquare(), &gold );
-	SceneDagNode* wall3 = raytracer.addObject( new UnitSquare(), &jade );
-	SceneDagNode* wall4 = raytracer.addObject( new UnitSquare(), &jade );
+	SceneDagNode* wall1 = raytracer.addObject( new UnitSquare(), &wall );
+	SceneDagNode* wall2 = raytracer.addObject( new UnitSquare(), &wall );
+	SceneDagNode* wall3 = raytracer.addObject( new UnitSquare(), &wall );
+	SceneDagNode* wall4 = raytracer.addObject( new UnitSquare(), &wall );
 
 	// Apply some transformations to the unit square.
 	double factor1[3] = { 2.0, 2.0, 2.0 };
@@ -118,10 +118,10 @@ int main(int argc, char* argv[])
 
 	// Render the scene, feel free to make the image smaller for
 	// testing purposes.
-	//raytracer.render(width, height, eye, view, up, fov, "view1.bmp");
+	raytracer.render(width, height, eye, view, up, fov, "view1.bmp");
 	
 	// Render it from a different point of view.
-	Point3D eye2(4, 2, 1);
+	Point3D eye2(5, 4, 1);
 	Vector3D view2(-4, -2, -6);
 	raytracer.render(width, height, eye2, view2, up, fov, "view2.bmp");
 

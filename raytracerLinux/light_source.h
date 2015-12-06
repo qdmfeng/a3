@@ -17,7 +17,6 @@
 class LightSource {
 public:
 	virtual void shade( Ray3D& ) = 0;
-	virtual void shadeShadow( Ray3D& ray ) = 0;;
 	virtual Point3D get_position() const = 0; 
 };
 
@@ -31,7 +30,6 @@ public:
 	: _pos(pos), _col_ambient(ambient), _col_diffuse(diffuse), 
 	_col_specular(specular) {}
 	void shade( Ray3D& ray );
-	void shadeShadow( Ray3D& ray );
 	Point3D get_position() const { return _pos; }
 	
 private:

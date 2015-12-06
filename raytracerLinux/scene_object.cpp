@@ -12,8 +12,9 @@
 #include <iostream>
 #include "scene_object.h"
 
+
 bool UnitSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
-		const Matrix4x4& modelToWorld ) {
+		const Matrix4x4& modelToWorld, Material *material ) {
 	// TODO: implement intersection code for UnitSquare, which is
 	// defined on the xy-plane, with vertices (0.5, 0.5, 0), 
 	// (-0.5, 0.5, 0), (-0.5, -0.5, 0), (0.5, -0.5, 0), and normal
@@ -57,6 +58,24 @@ bool UnitSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
 			ray.intersection.t_value = t;
 			ray.intersection.normal = transNorm(worldToModel, normal);
 			ray.intersection.normal.normalize();
+
+			// when material has texture associated with it
+			if (material->texture != NULL) {
+				int width = floor(material->texture->width * (x + 0.5));
+		        int height = floor(material->texture->height * (y + 0.5));
+		        int index = height * material->texture->width + width;
+		        // get texture value
+		        int r_value = (int) *(material->texture->rarray + index);
+		        double R = (double) r_value / 255;
+		        int g_value = (int) *(material->texture->barray + index);
+		        double G = (double) g_value / 255;
+		        int b_value = (int) *(material->texture->garray + index);
+		        double B = (double) b_value / 255;
+				Colour textureCol = Colour(R, G, B);
+		        //material->ambient = textureCol;
+		        material->diffuse = textureCol;
+    		}
+
 			return true;
 		}else{
 			return false;
@@ -66,7 +85,7 @@ bool UnitSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
 
 
 bool UnitSphere::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
-		const Matrix4x4& modelToWorld ) {
+		const Matrix4x4& modelToWorld, Material * material ) {
 	// TODO: implement intersection code for UnitSphere, which is centred 
 	// on the origin.  
 	//
@@ -133,7 +152,7 @@ bool UnitSphere::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
 }
 
 bool UnitCylinder::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
-		const Matrix4x4& modelToWorld ) {
+		const Matrix4x4& modelToWorld, Material * material ) {
         // The intersection for a unit cylinder with the top and 
         // the base are unit circles with radius=1 centered at (0,0,z),
         // where z is -0.5, 0.5, respectively. 

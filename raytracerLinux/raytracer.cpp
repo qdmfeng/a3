@@ -163,7 +163,7 @@ void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {
 	_worldToModel = node->invtrans*_worldToModel; 
 	if (node->obj) {
 		// Perform intersection.
-		if (node->obj->intersect(ray, _worldToModel, _modelToWorld)) {
+		if (node->obj->intersect(ray, _worldToModel, _modelToWorld, node->mat)) {
 			ray.intersection.mat = node->mat;
 		}
 	}
@@ -183,7 +183,7 @@ void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {
 void Raytracer::computeShading( Ray3D& ray ) {
 	LightListNode* curLight = _lightSource;
 	Colour sum_shade(0.0, 0.0, 0.0);
-	int light_num = 1;
+	int light_num = 15;
 	for (;;) {
 		if (curLight == NULL) break;
 		// Each lightSource provides its own shading function.
@@ -263,9 +263,11 @@ Colour Raytracer::shadeRay( Ray3D& ray, int recursiveDepth ) {
 		// You'll want to call shadeRay recursively (with a different ray, 
 		// of course) here to implement reflection/refraction effects.
 		if (recursiveDepth > 0){
+
 			// implement reflection
 			if (ray.intersection.mat->refraction == 0){
 				ray.dir.normalize();
+				// reflectin direction
 				Vector3D mirrorDir = ((2 * (ray.intersection.normal.dot(-ray.dir))) * ray.intersection.normal) - (-ray.dir);
 				Ray3D reflectRay(ray.intersection.point + 0.01 * mirrorDir, mirrorDir);
 				shadeRay(reflectRay, recursiveDepth - 1);
@@ -273,7 +275,8 @@ Colour Raytracer::shadeRay( Ray3D& ray, int recursiveDepth ) {
 					col = col + ray.intersection.mat->specular * reflectRay.col;
 			}
 			
-			// implement refraction - transparent object has refraction > 0
+			// implement refraction
+			// transparent object has refraction > 0
 			if (ray.intersection.mat->refraction > 0) {
 				Vector3D surfaceNormal = ray.intersection.normal;
 				double cosAngle = surfaceNormal.dot(-ray.dir);
@@ -290,6 +293,7 @@ Colour Raytracer::shadeRay( Ray3D& ray, int recursiveDepth ) {
 				double sinTheta = index * index * (1.0 - cosAngle * cosAngle);
 				// not total internal refraction
 				if (sinTheta <= 1.0){
+					// refraction direction
 					Vector3D refractionDir = index * -ray.dir - (index * cosAngle + sqrt(1.0 - sinTheta)) * surfaceNormal;
 					refractionDir.normalize();
 					Ray3D refractionRay(ray.intersection.point + 0.01 * refractionDir, refractionDir);			
@@ -311,7 +315,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 	_scrWidth = width;
 	_scrHeight = height;
 	double factor = (double(height)/2)/tan(fov*M_PI/360.0);
-	bool antiAlias = false;
+	bool antiAlias = true;
 	int recursiveDepth = 5;
 
 	initPixelBuffer();
@@ -356,9 +360,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 				Point3D worldImagePlane = viewToWorld * imagePlane;
 
 				Vector3D direction(worldImagePlane[0] - worldOrigin[0], worldImagePlane[1] - worldOrigin[1], worldImagePlane[2] - worldOrigin[2]);
-
 				Ray3D ray(worldImagePlane, direction);
-
 				Colour col = shadeRay(ray, recursiveDepth); 
 
 				_rbuffer[i*width+j] = int(col[0]*255);
