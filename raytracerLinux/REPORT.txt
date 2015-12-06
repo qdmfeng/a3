@@ -1,6 +1,6 @@
 Assignment 3 Project
 
-Shihao Miao
+Shihao Miao 998800828 g2miaosh
 Ziyi Mu
 
 In this assignment, we finished the functions in ray tracer and generated 6 images for part 1, and then we extended the ray tracer to generate images of a chamber with several advanced ray tracing features for part 2.
