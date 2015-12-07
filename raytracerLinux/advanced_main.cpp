@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 
 	Material wall( Colour(0.1, 0.1, 0.1), Colour(0.1, 0.1, 0.1), 
 		Colour(0.1, 0.1, 0.1), 
-		5.0, 1.8, &lightning );
+		5.0, 0, &lightning );
 
 
 	// Defines a point light source.

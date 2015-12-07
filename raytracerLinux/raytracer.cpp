@@ -280,15 +280,12 @@ Colour Raytracer::shadeRay( Ray3D& ray, int recursiveDepth ) {
 			if (ray.intersection.mat->refraction > 0) {
 				Vector3D surfaceNormal = ray.intersection.normal;
 				double cosAngle = surfaceNormal.dot(-ray.dir);
-				double index = 1.0;
+				double index = ray.intersection.mat->refraction;
 				// ray into material
 				if (cosAngle > 0){
 					index = 1.0 / ray.intersection.mat->refraction;
 					// need to change surface normal
 					surfaceNormal = -surfaceNormal;
-				}				
-				else{
-					index = ray.intersection.mat->refraction;
 				}
 				double sinTheta = index * index * (1.0 - cosAngle * cosAngle);
 				// not total internal refraction
@@ -316,7 +313,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 	_scrHeight = height;
 	double factor = (double(height)/2)/tan(fov*M_PI/360.0);
 	bool antiAlias = true;
-	int recursiveDepth = 5;
+	int recursiveDepth = 4;
 
 	initPixelBuffer();
 	viewToWorld = initInvViewMatrix(eye, view, up);

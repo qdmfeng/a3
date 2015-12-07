@@ -63,6 +63,7 @@ bool UnitSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
 			if (material->texture != NULL) {
 				int width = floor(material->texture->width * (x + 0.5));
 		        int height = floor(material->texture->height * (y + 0.5));
+		        // index of the array
 		        int index = height * material->texture->width + width;
 		        // get texture value
 		        int r_value = (int) *(material->texture->rarray + index);
